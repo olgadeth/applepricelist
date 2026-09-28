@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Med - Product Quotation & Ordering</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-white text-blue-700 font-bold p-2.5 rounded-xl shadow-sm text-lg">💊</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Apple Med Product Catalogue</h1>
+                    <p class="text-xs text-blue-200">Select items, specify quantities, and send quotation via WhatsApp</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <input type="text" id="searchInput" placeholder="Search by item code or product..." 
+                    class="w-full sm:w-80 px-4 py-2 rounded-lg bg-blue-900/50 border border-blue-400/30 text-white placeholder-blue-300 text-sm focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+        
+        <!-- Product List Section -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wider">Available Products (<span id="productCount">0</span>)</h2>
+                <span class="text-xs text-gray-500">Adjust quantity to add to order</span>
+            </div>
+            <div class="overflow-x-auto flex-grow max-h-[650px] overflow-y-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-600 text-xs uppercase sticky top-0 border-b border-gray-200 z-10">
+                        <tr>
+                            <th class="py-3 px-4 font-semibold">Item Code</th>
+                            <th class="py-3 px-4 font-semibold">Product Description</th>
+                            <th class="py-3 px-4 font-semibold text-right">Unit Price (AED)</th>
+                            <th class="py-3 px-4 font-semibold text-center w-32">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody" class="divide-y divide-gray-100 text-sm">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Order Summary & Checkout Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between h-fit sticky top-24">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                    <span>Order Summary</span>
+                    <span class="text-xs font-normal bg-blue-50 text-blue-700 py-1 px-2.5 rounded-full font-medium">WhatsApp Direct</span>
+                </h2>
+
+                <!-- Customer Details Form -->
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Customer Name *</label>
+                        <input type="text" id="customerName" placeholder="Enter customer or clinic name" 
+                            class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Remarks / Notes (Optional)</label>
+                        <input type="text" id="customerNotes" placeholder="e.g., Urgent delivery, Branch name..." 
+                            class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Selected Items List -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold uppercase text-gray-500">Selected Items</span>
+                        <button onclick="clearAllCart()" class="text-xs text-red-500 hover:text-red-700 font-medium">Clear All</button>
+                    </div>
+                    <div id="cartItemsList" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-sm text-gray-600 mb-4">
+                        <p class="text-gray-400 text-xs italic text-center py-6">No products selected yet. Adjust quantities on the left.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total & Checkout Button -->
+            <div class="border-t border-gray-100 pt-4 mt-2">
+                <div class="flex justify-between items-center mb-4 text-base font-bold text-gray-900">
+                    <span>Total Amount:</span>
+                    <span id="cartTotal" class="text-blue-600 text-xl">AED 0.00</span>
+                </div>
+                <button onclick="sendToWhatsApp()" 
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    Send Quotation to WhatsApp
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-4 mt-8 text-center text-xs text-gray-500">
+        Apple Med Quotation System &bull; Direct WhatsApp Order to +971 56 408 6210
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const products = [{"Item Code": "EM-1871", "Product": "Fix Roll 5cmx10m (Euromed)", "Unit Price (AED)": 9}, {"Item Code": "EM-3024", "Product": "Non Woven (Paper) Surgical Tape 5cm x 10Y (6 Rolls/Pkt) Euromed", "Unit Price (AED)": 22}, {"Item Code": "EM-3277", "Product": "P E (Transparent) Surgical Tape 2.5cmx10Y (12 Rolls/Pkt) Euromed", "Unit Price (AED)": 22}, {"Item Code": "EM-1872", "Product": "Fix Roll 7.5cmx10m (Euromed)", "Unit Price (AED)": 11}, {"Item Code": "EM-12010", "Product": "Spot Bandage 100's", "Unit Price (AED)": 2.8}, {"Item Code": "EM-10614", "Product": "Ultrasound Gel 5 Ltr - White - Euromed", "Unit Price (AED)": 55}, {"Item Code": "PD103", "Product": "RC Help (EDTA Paste) 2 x 3g - Prime", "Unit Price (AED)": 30}, {"Item Code": "TP-2120A", "Product": "Biofactor MTA-RC Repair Kit (0.2g powder + 1.5 ml liquid + 1 syringe) - Imicryl", "Unit Price (AED)": 50}, {"Item Code": "EM-7000", "Product": "Articulating Paper Straight 12 PCS (Blue & Red)", "Unit Price (AED)": 22}, {"Item Code": "EM-4152", "Product": "Autoclave Steam Tape - 19mm x 50m (Euromed)", "Unit Price (AED)": 10}, {"Item Code": "EM-0390", "Product": "Biological Indicator - Euromed", "Unit Price (AED)": 5.5}, {"Item Code": "EM-0289", "Product": "Barrier Film Blue - Euromed", "Unit Price (AED)": 30}, {"Item Code": "EM-7059", "Product": "Hand Free Cheek Retractors - Adult (2 Pcs/Pkt)", "Unit Price (AED)": 18}, {"Item Code": "EM-7060", "Product": "Hand Free Cheek Retractors - Child (2 Pcs/Pkt)", "Unit Price (AED)": 18}, {"Item Code": "OM-20229", "Product": "Dental Bibs - Blue (500 Pcs/Ctn) Oximed", "Unit Price (AED)": 35}, {"Item Code": "OM-20153", "Product": "Dental Cotton Roll #2 (2000pc/pkt) - Oximed", "Unit Price (AED)": 38}, {"Item Code": "EM-7306", "Product": "Dental Needle Short 27Gx21mm - Denject", "Unit Price (AED)": 20}, {"Item Code": "EM-7307", "Product": "Dental Needle Long 27Gx30mm - Denject", "Unit Price (AED)": 20}, {"Item Code": "EM-7308", "Product": "Dental Needle Ultra Short 31Gx12mm - Euromed", "Unit Price (AED)": 28}, {"Item Code": "EM-7309", "Product": "Dental Needle Short 30Gx21mm - Euromed", "Unit Price (AED)": 25}, {"Item Code": "AW-14325", "Product": "Sectional Matrix with Springclip System 1.330 - Euromed", "Unit Price (AED)": 70}, {"Item Code": "EM-7024", "Product": "Disp. Impression Tray #1 Large Upper (12 Pcs/Pkt)", "Unit Price (AED)": 18}, {"Item Code": "EM-7025", "Product": "Disp. Impression Tray #2 Large Lower (12 Pcs/Pkt)", "Unit Price (AED)": 18}, {"Item Code": "EM-1773", "Product": "Etching Tips - Black 20G (100 Pcs/Pkt)", "Unit Price (AED)": 25}, {"Item Code": "EM-2211", "Product": "High Suction Tip - White (100 Pcs/Pkt) Dentacore", "Unit Price (AED)": 10}, {"Item Code": "EM-7030", "Product": "Disp. Irrigation Needle 27G Yellow (100 Pcs/Pkt) - Euromed", "Unit Price (AED)": 40}, {"Item Code": "EM-7115", "Product": "Micro Brushes - Super Fine (100 Pcs/Pkts) - Dentacore", "Unit Price (AED)": 6}, {"Item Code": "EM-4012", "Product": "Steam Indicator Strip Class 4 (250 pcs x 2) (Euromed)", "Unit Price (AED)": 30}, {"Item Code": "EM-4116", "Product": "St Pouch 12x18 (305x500mm) Euromed", "Unit Price (AED)": 125}, {"Item Code": "EM-4089", "Product": "St Pouch 2 1/4x4 (57x130mm) Euromed", "Unit Price (AED)": 9}, {"Item Code": "EM-7189", "Product": "Wooden Wedges - Orange (100 Pcs/Pkt)", "Unit Price (AED)": 25}, {"Item Code": "EM-9787", "Product": "Anesthetic Spray", "Unit Price (AED)": 70}, {"Item Code": "OM-20941", "Product": "Disp. Plastic Tray - Monotray (400 Pcs/Ctn) Oximed", "Unit Price (AED)": 110}, {"Item Code": "OM-20229", "Product": "Dental Bibs - Blue (500 Pcs/Ctn) Oximed", "Unit Price (AED)": 35}, {"Item Code": "EM-10065", "Product": "Disp. Paper Cup", "Unit Price (AED)": 56}, {"Item Code": "EM-10116", "Product": "Disp. Plastic Cups", "Unit Price (AED)": 35}, {"Item Code": "EM-10078", "Product": "Face Tissue (200 sheets x 30 box)", "Unit Price (AED)": 72}, {"Item Code": "EM-10053", "Product": "Couch Roll UAE (12roll/Ctn)", "Unit Price (AED)": 73}, {"Item Code": "EM-10083", "Product": "Interfold Towel", "Unit Price (AED)": 42}, {"Item Code": "EM-17535", "Product": "Yellow Bag Medium", "Unit Price (AED)": 1.4}, {"Item Code": "EM-10118", "Product": "Sharp Container 10 Ltr", "Unit Price (AED)": 10}, {"Item Code": "OM-20153", "Product": "Dental Cotton Roll #2 (2000pc/pkt) - Oximed", "Unit Price (AED)": 38}, {"Item Code": "EM-2313", "Product": "Disposable Syringe 3ml 23x1 1/4 - Euromed (100 Pcs/Box)", "Unit Price (AED)": 14}, {"Item Code": "EM-4439", "Product": "Disposable Syringe 5ml 23x1 1/4 - Euromed (100 Pcs/Box)", "Unit Price (AED)": 15}, {"Item Code": "EM-2351", "Product": "Disposable Syringe 10ml 18x1 1/2 - Euromed (50 Pcs/Box)", "Unit Price (AED)": 11}, {"Item Code": "EM-1373", "Product": "Dispensing Bag Size 10x15 cm (100 Pcs/Pkt) Euromed", "Unit Price (AED)": 5}, {"Item Code": "EM-2581", "Product": "Latex Gloves (Powder Free) X-Small", "Unit Price (AED)": 16}, {"Item Code": "EM-10106", "Product": "Nitrile Gloves (Powder Free) Medium - Fantastic", "Unit Price (AED)": 14}, {"Item Code": "EM-2586", "Product": "Latex Gloves (Powder Free) Medium", "Unit Price (AED)": 14}, {"Item Code": "EM-11365", "Product": "Isolation Gown 45Gsm with knitted Cuff-Blue - Euromed", "Unit Price (AED)": 1.65}, {"Item Code": "EM-1124", "Product": "PE Laminated Hospital Bed Roll 80x50 (Euromed)", "Unit Price (AED)": 21}, {"Item Code": "EM-9931", "Product": "Mixing Tip Yellow - 70mm", "Unit Price (AED)": 25}, {"Item Code": "EM-2653", "Product": "Mixing Tip Blue - Tapered", "Unit Price (AED)": 25}, {"Item Code": "EM-3614", "Product": "Saliva Ejector Removable Clear Tip (100 Pcs/Pkt) - Dentacore", "Unit Price (AED)": 9}, {"Item Code": "EM-3612", "Product": "Saliva Ejector with non removable Blue Tip (100 Pcs/Pkt) - Dentacore", "Unit Price (AED)": 9}, {"Item Code": "EM-13576", "Product": "Nosoclean Instrument & Eq. Detergent 5L - Medalkan", "Unit Price (AED)": 170}, {"Item Code": "EM-10066", "Product": "Disposable Razor (Euromed)", "Unit Price (AED)": 0.75}, {"Item Code": "EM-1996", "Product": "Gauze Swab Sterile 10x10cm 8ply 5pcs/blist, 20packs/box (Euromed)", "Unit Price (AED)": 15}, {"Item Code": "EM-1991", "Product": "Gauze Swab Sterile 5x5cm 8ply 5pcs/blist, 20packs/box (Euromed)", "Unit Price (AED)": 7.5}, {"Item Code": "EM-0289", "Product": "Barrier Film Blue - Euromed", "Unit Price (AED)": 30}, {"Item Code": "EM-0290", "Product": "Barrier Film Clear - Euromed", "Unit Price (AED)": 30}, {"Item Code": "EM-5154", "Product": "Transparent Wound Dressing 10x20cm Euromed (25pcs)", "Unit Price (AED)": 35}, {"Item Code": "EM-1834", "Product": "Face Mask 3ply with Ear Loop (50 Pcs/Pkt) Euromed", "Unit Price (AED)": 4}, {"Item Code": "EM-5081", "Product": "Wooden Tongue Depressor Non-Sterile (Euromed)", "Unit Price (AED)": 2.8}, {"Item Code": "OM-20321", "Product": "Alcohol Swab 200's (Oximed)", "Unit Price (AED)": 4}, {"Item Code": "EM-4089", "Product": "St Pouch 2 1/4x4 (57x130mm) Euromed", "Unit Price (AED)": 9}, {"Item Code": "EM-4083", "Product": "St Pouch 2 1/4x2 3/4 (63x100mm) Euromed", "Unit Price (AED)": 10}, {"Item Code": "EM-4109", "Product": "St Pouch 7x1/2x13 (190x360mm) Euromed", "Unit Price (AED)": 55}, {"Item Code": "EM-4099", "Product": "St Pouch 3 1/2x10 (90x260mm) Euromed", "Unit Price (AED)": 14}, {"Item Code": "EM-4094", "Product": "St Pouch 2 3/4x9 (70x260mm) Euromed", "Unit Price (AED)": 14}, {"Item Code": "EM-4097", "Product": "St Pouch 3 1/2x5 1/4 (90x165mm) Euromed", "Unit Price (AED)": 15}, {"Item Code": "EM-4104", "Product": "St Pouch 6x10 (155x260mm) Euromed", "Unit Price (AED)": 32}, {"Item Code": "EM-4112", "Product": "St Pouch 9x15 1/2 (230x395mm) Euromed", "Unit Price (AED)": 65}, {"Item Code": "EM-2089", "Product": "Gauze Swab Non Woven 7.5x7.5cm 6ply (Euromed)", "Unit Price (AED)": 4.25}, {"Item Code": "EM-2523", "Product": "Lap Sponge Sterile 30x30cm 12ply (2 Pcs/Pkt) Euromed", "Unit Price (AED)": 4}, {"Item Code": "EM-2528", "Product": "Lap Sponge Sterile 45x45cm 12ply (2 Pcs/Pkt) Euromed", "Unit Price (AED)": 6}, {"Item Code": "EM-7197", "Product": "IV Set Y Connector (Euromed)", "Unit Price (AED)": 0.6}, {"Item Code": "EM-2342", "Product": "IV Set Luer Lock 21G (Euromed)", "Unit Price (AED)": 0.55}, {"Item Code": "EM-0451", "Product": "Blood Transfusion Set (Euromed)", "Unit Price (AED)": 1.4}, {"Item Code": "EM-15035", "Product": "3 way stopcock w/ ext. line - Euromed", "Unit Price (AED)": 1.4}, {"Item Code": "OM-20969", "Product": "Transparent Wound Dressing 6x7cm Oximed (50pcs)", "Unit Price (AED)": 13}, {"Item Code": "EM-2421", "Product": "IV Cannula 14G Euromed", "Unit Price (AED)": 0.8}, {"Item Code": "EM-2424", "Product": "IV Cannula 16G Euromed", "Unit Price (AED)": 0.8}, {"Item Code": "OM-50150", "Product": "IV Cannula 18G - Oximed", "Unit Price (AED)": 0.8}, {"Item Code": "EM-2428", "Product": "IV Cannula 20G Euromed", "Unit Price (AED)": 0.8}, {"Item Code": "EM-2431", "Product": "IV Cannula 22G Euromed", "Unit Price (AED)": 0.8}, {"Item Code": "EM-4764", "Product": "Disp. Vaginal Speculum - Small (Euromed)", "Unit Price (AED)": 1.1}, {"Item Code": "EM-4769", "Product": "Disp. Vaginal Speculum - Medium (Euromed)", "Unit Price (AED)": 1.1}, {"Item Code": "EM-4772", "Product": "Disp. Vaginal Speculum - Large (Euromed)", "Unit Price (AED)": 1.1}, {"Item Code": "EM-1611", "Product": "Ear Bulb Syringe 30ml (Euromed)", "Unit Price (AED)": 3}, {"Item Code": "EM-1434", "Product": "Dressing Set Medium (Euromed)", "Unit Price (AED)": 3.5}, {"Item Code": "EM-3647", "Product": "Skin Marker", "Unit Price (AED)": 2.5}, {"Item Code": "EM-4212", "Product": "Surgical Blade With Handle No: 10 (Euromed)", "Unit Price (AED)": 12}, {"Item Code": "EM-4214", "Product": "Surgical Blade With Handle No: 11 (Euromed)", "Unit Price (AED)": 12}, {"Item Code": "EM-4218", "Product": "Surgical Blade With Handle No: 15 (Euromed)", "Unit Price (AED)": 12}, {"Item Code": "EM-2018", "Product": "Gauze Swab Sterile 10x10cm 12ply 5pcs/blist, 20packs/box (Euromed)", "Unit Price (AED)": 14}, {"Item Code": "EM-2065", "Product": "Gauze Swab Sterile With X Ray 10x10cm 12ply (Euromed)", "Unit Price (AED)": 18}, {"Item Code": "EM-1944", "Product": "Gauze Swab Non Sterile 5x5cm 8ply (Euromed)", "Unit Price (AED)": 2.5}, {"Item Code": "EM-1947", "Product": "Gauze Swab Non Sterile 7.5x7.5cm 8ply (Euromed)", "Unit Price (AED)": 4.5}, {"Item Code": "EM-1949", "Product": "Gauze Swab Non Sterile 10x10cm 8ply (Euromed)", "Unit Price (AED)": 6.5}, {"Item Code": "EM-1961", "Product": "Gauze Swab Non Sterile 5x5cm 12ply (Euromed)", "Unit Price (AED)": 3.25}, {"Item Code": "EM-4186", "Product": "Surgical Blade No: 21 (Euromed)", "Unit Price (AED)": 18}, {"Item Code": "EM-4188", "Product": "Surgical Blade No: 22 (Euromed)", "Unit Price (AED)": 18}, {"Item Code": "EM-14225", "Product": "Ear Probe Cover (200 Pcs/Pkt) New Model - Euromed", "Unit Price (AED)": 30}, {"Item Code": "EM-5081", "Product": "Wooden Tongue Depressor Non-Sterile (Euromed)", "Unit Price (AED)": 2.75}, {"Item Code": "EM-5084", "Product": "Wooden Tongue Depressor Sterile (Euromed)", "Unit Price (AED)": 5.9}, {"Item Code": "EM-5056", "Product": "Cotton Tipped Applicator Sterile 6 inch (100 Pcs/Pkt) Euromed", "Unit Price (AED)": 10}, {"Item Code": "EM-3018", "Product": "Non Woven (Paper) Surgical Tape 1.25cm x 10Y (24 Rolls/Pkt) Euromed", "Unit Price (AED)": 21}, {"Item Code": "EM-3021", "Product": "Non Woven (Paper) Surgical Tape 2.5cm x 10Y (12 Rolls/Pkt) Euromed", "Unit Price (AED)": 21}, {"Item Code": "EM-3024", "Product": "Non Woven (Paper) Surgical Tape 5cm x 10Y (6 Rolls/Pkt) Euromed", "Unit Price (AED)": 21}, {"Item Code": "EM-7546", "Product": "Surgical Silk Tape 1.25cmx10Y (24 Rolls/Pkt) - Euromed", "Unit Price (AED)": 24}, {"Item Code": "EM-7548", "Product": "Surgical Silk Tape 5cmx10Y (6 Rolls/Pkt) - Euromed", "Unit Price (AED)": 24}, {"Item Code": "EM-12000", "Product": "Temporary cement", "Unit Price (AED)": "AED 160.00"}, {"Item Code": "EM-7249", "Product": "Die Stone", "Unit Price (AED)": "AED 25.00"}, {"Item Code": "", "Product": "k files ", "Unit Price (AED)": "AED 10 .00"}, {"Item Code": "", "Product": "H files", "Unit Price (AED)": "AED 10.00"}, {"Item Code": "", "Product": "broaches", "Unit Price (AED)": "AED 10.00"}, {"Item Code": "", "Product": "full chair cover sleeves", "Unit Price (AED)": "AED 115.00"}, {"Item Code": "", "Product": "Saliva ejector ", "Unit Price (AED)": "AED 9.00"}, {"Item Code": "", "Product": "mixing tips ", "Unit Price (AED)": "AED 14.00"}];
+
+        let cart = {}; // itemCode -> quantity
+
+        function renderProducts(filteredProducts) {
+            const tbody = document.getElementById('productTableBody');
+            document.getElementById('productCount').textContent = filteredProducts.length;
+            
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400 italic">No products found matching your search.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredProducts.map(p => {
+                const qty = cart[p['Item Code']] || 0;
+                return `
+                    <tr class="hover:bg-blue-50/40 transition duration-150">
+                        <td class="py-3 px-4 font-mono text-xs font-semibold text-blue-700 whitespace-nowrap">${p['Item Code']}</td>
+                        <td class="py-3 px-4 text-gray-900">${p['Product']}</td>
+                        <td class="py-3 px-4 text-right font-medium text-gray-700 whitespace-nowrap">AED ${Number(p['Unit Price (AED)']).toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="inline-flex items-center border border-gray-300 rounded-lg bg-white shadow-sm overflow-hidden">
+                                <button onclick="updateQty('${p['Item Code']}', -1)" class="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold text-xs transition">-</button>
+                                <input type="number" min="0" value="${qty}" onchange="setQty('${p['Item Code']}', this.value)" 
+                                    class="w-12 text-center text-xs font-semibold focus:outline-none py-1 border-x border-gray-200">
+                                <button onclick="updateQty('${p['Item Code']}', 1)" class="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold text-xs transition">+</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateQty(itemCode, change) {
+            const current = cart[itemCode] || 0;
+            const updated = Math.max(0, current + change);
+            if (updated === 0) {
+                delete cart[itemCode];
+            } else {
+                cart[itemCode] = updated;
+            }
+            renderProducts(getFilteredProducts());
+            renderCart();
+        }
+
+        function setQty(itemCode, val) {
+            const parsed = parseInt(val);
+            if (isNaN(parsed) || parsed <= 0) {
+                delete cart[itemCode];
+            } else {
+                cart[itemCode] = parsed;
+            }
+            renderProducts(getFilteredProducts());
+            renderCart();
+        }
+
+        function clearAllCart() {
+            cart = {};
+            renderProducts(getFilteredProducts());
+            renderCart();
+        }
+
+        function getFilteredProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) return products;
+            return products.filter(p => 
+                p['Item Code'].toLowerCase().includes(query) || 
+                p['Product'].toLowerCase().includes(query)
+            );
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItemsList');
+            const itemCodes = Object.keys(cart);
+            
+            if (itemCodes.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-xs italic text-center py-6">No products selected yet. Adjust quantities on the left.</p>`;
+                document.getElementById('cartTotal').textContent = 'AED 0.00';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = itemCodes.map(code => {
+                const p = products.find(x => x['Item Code'] === code);
+                const qty = cart[code];
+                const subtotal = p['Unit Price (AED)'] * qty;
+                total += subtotal;
+                return `
+                    <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-100 text-xs">
+                        <div class="pr-2 flex-grow">
+                            <p class="font-semibold text-gray-800 line-clamp-1">${p['Product']}</p>
+                            <p class="text-gray-500">${code} &bull; ${qty} x AED ${p['Unit Price (AED)']}</p>
+                        </div>
+                        <div class="text-right font-bold text-blue-600 whitespace-nowrap">
+                            AED ${subtotal.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cartTotal').textContent = `AED ${total.toFixed(2)}`;
+        }
+
+        function sendToWhatsApp() {
+            const customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                alert('Please enter the Customer Name before sending the quotation.');
+                document.getElementById('customerName').focus();
+                return;
+            }
+
+            const itemCodes = Object.keys(cart);
+            if (itemCodes.length === 0) {
+                alert('Please select at least one product to generate a quotation.');
+                return;
+            }
+
+            const notes = document.getElementById('customerNotes').value.trim();
+            
+            let message = `📋 *NEW PRODUCT QUOTATION*\n`;
+            message += `👤 *Customer:* ${customerName}\n`;
+            if (notes) {
+                message += `📝 *Notes:* ${notes}\n`;
+            }
+            message += `📅 *Date:* ${new Date().toLocaleDateString()}\n`;
+            message += `----------------------------------\n`;
+            
+            let total = 0;
+            itemCodes.forEach((code, index) => {
+                const p = products.find(x => x['Item Code'] === code);
+                const qty = cart[code];
+                const subtotal = p['Unit Price (AED)'] * qty;
+                total += subtotal;
+                message += `${index + 1}. *${p['Product']}*\n`;
+                message += `   Code: ${code} | Qty: ${qty} | Unit: AED ${p['Unit Price (AED)']} | *Subtotal: AED ${subtotal.toFixed(2)}*\n`;
+            });
+            
+            message += `----------------------------------\n`;
+            message += `💰 *TOTAL AMOUNT: AED ${total.toFixed(2)}*`;
+
+            const phone = "971564086210";
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/${phone}?text=${encodedMessage}`;
+            
+            window.open(whatsappURL, '_blank');
+        }
+
+        // Event listener for search
+        document.getElementById('searchInput').addEventListener('input', () => {
+            renderProducts(getFilteredProducts());
+        });
+
+        // Initial render
+        renderProducts(products);
+    </script>
+</body>
+</html>
